@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Philippine Tax Calculator</title>
+    <link rel="stylesheet" href="styles.ccs">
+</head>
+<body>
+
+    <h1>Philippine Tax Calculator</h1>
+
+    <!-- Display the tax brackets with rates and income ranges in a table -->
+    <table border="1" class="border1">
+        <tr>
+            <th>Tax Bracket</th>
+            <th>Annual Income Range (PHP)</th>
+            <th>Tax Rate (%)</th>
+        </tr>
+        <tr>
+            <td>1</td>
+            <td>Up to PHP 250,000</td>
+            <td>20%</td>
+        </tr>
+        <tr>
+            <td>2</td>
+            <td>PHP 250,001 to PHP 400,000</td>
+            <td>25%</td>
+        </tr>
+        <tr>
+            <td>3</td>
+            <td>PHP 400,001 to PHP 800,000</td>
+            <td>30%</td>
+        </tr>
+        <tr>
+            <td>4</td>
+            <td>PHP 800,001 to PHP 2,000,000</td>
+            <td>35%</td>
+        </tr>
+        <tr>
+            <td>5</td>
+            <td>Above PHP 2,000,000</td>
+            <td>40%</td>
+        </tr>
+    </table>
+
+    <h2>Input</h2>
+
+    <label for="income">Annual Income (PHP):</label>
+    <input type="number" id="income" placeholder="ENTER DETAILS">
+
+    <button onclick="calculateTax()">Calculate Tax</button>
+
+    <h2>Result</h2>
+
+    <!-- Display the income tax in a textbox -->
+    <label for="incomeTax">Income Tax (PHP):</label>
+    <input type="text" id="incomeTax" readonly><br><br>
+
+    <!-- Display the monthly tax in a textbox -->
+    <label for="monthlyTax">Monthly Tax (PHP):</label>
+    <input type="text" id="monthlyTax" readonly><br><br>
+
+    <!-- Display the monthly income in a textbox -->
+    <label for="monthlyIncome">Monthly Income (PHP):</label>
+    <input type="text" id="monthlyIncome" readonly><br><br>
+
+    <!-- Display the tax rate in a textbox -->
+    <label for="taxRate">Tax Rate (%):</label>
+    <input type="text" id="taxRate" readonly>
+
+    <p id="result" style="display: none;"></p>
+
+    <script>
+        // Fixed tax rates from the array
+        var taxRates = [20, 25, 30, 35, 40];
+
+        function calculateTax() {
+            // Get income value
+            var income = parseFloat(document.getElementById('income').value);
+
+            // Check if the value is valid
+            if (isNaN(income)) {
+                document.getElementById('result').innerHTML = 'Please enter a valid number for income.';
+                return;
+            }
+
+            // Calculate tax based on Philippine tax rates
+            var taxAmount = calculatePhilippineTax(income);
+
+            // Display the result
+            document.getElementById('result').innerHTML = 'Income Tax: PHP ' + taxAmount.toFixed(2);
+
+            // Display the income tax
+            document.getElementById('incomeTax').value = taxAmount.toFixed(2);
+
+            // Display the monthly tax
+            var monthlyTax = taxAmount / 12;
+            document.getElementById('monthlyTax').value = monthlyTax.toFixed(2);
+
+            // Display the monthly income
+            var monthlyIncome = income / 12;
+            document.getElementById('monthlyIncome').value = monthlyIncome.toFixed(2);
+
+            // Display the tax rate
+            var taxRateIndex = getTaxRateIndex(income);
+            var taxRate = taxRates[taxRateIndex];
+            document.getElementById('taxRate').value = taxRate.toFixed(2) + '%';
+        }
+
+        function calculatePhilippineTax(income) {
+            // Philippine Tax Ranges (as of my last knowledge update in January 2022)
+            var taxRanges = [250000, 400000, 800000, 2000000];
+            var tax = 0;
+
+            for (var i = 0; i < taxRanges.length; i++) {
+                if (income <= taxRanges[i]) {
+                    tax += income * (taxRates[i] / 100);
+                    return tax;
+                } else {
+                    tax += (taxRanges[i] - (i === 0 ? 0 : taxRanges[i - 1])) * (taxRates[i] / 100);
+                    income -= (taxRanges[i] - (i === 0 ? 0 : taxRanges[i - 1]));
+                }
+            }
+
+            // If income exceeds the last range
+            tax += income * (taxRates[taxRates.length - 1] / 100);
+            return tax;
+        }
+
+        function getTaxRateIndex(income) {
+            var taxRanges = [250000, 400000, 800000, 2000000];
+
+            for (var i = 0; i < taxRanges.length; i++) {
+                if (income <= taxRanges[i]) {
+                    return i;
+                }
+            }
+
+            // If income exceeds the last range
+            return taxRanges.length; // Fix: return taxRanges.length instead of taxRanges.length - 1
+        }
+    </script>
+
+</body>
+</html>
