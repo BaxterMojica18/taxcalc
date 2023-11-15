@@ -11,36 +11,42 @@
     <h1>Philippine Tax Calculator</h1>
 
     <!-- Display the tax brackets with rates and income ranges in a table -->
-    <table border="1" class="border1">
+    <h2>Tax Table:</h2>
+    <table border="1">
         <tr>
-            <th>Tax Bracket</th>
-            <th>Annual Income Range (PHP)</th>
-            <th>Tax Rate (%)</th>
+            <th>Income Range</th>
+            <th>Tax Rate</th>
+            <th>Tax on Excess</th>
         </tr>
         <tr>
-            <td>1</td>
-            <td>Up to PHP 250,000</td>
+            <td>Up to P250,000</td>
+            <td>0%</td>
+            <td>0</td>
+        </tr>
+        <tr>
+            <td>Above P250,000 to P400,000</td>
+            <td>15%</td>
+            <td>15% of (Income - P250,000)</td>
+        </tr>
+        <tr>
+            <td>Above P400,000 to P800,000</td>
             <td>20%</td>
+            <td>P22,500 + 20% of (Income - P400,000)</td>
         </tr>
         <tr>
-            <td>2</td>
-            <td>PHP 250,001 to PHP 400,000</td>
+            <td>Above P800,000 to P2,000,000</td>
             <td>25%</td>
+            <td>P102,500 + 25% of (Income - P800,000)</td>
         </tr>
         <tr>
-            <td>3</td>
-            <td>PHP 400,001 to PHP 800,000</td>
+            <td>Above P2,000,000 to P8,000,000</td>
             <td>30%</td>
+            <td>P402,500 + 30% of (Income - P2,000,000)</td>
         </tr>
         <tr>
-            <td>4</td>
-            <td>PHP 800,001 to PHP 2,000,000</td>
+            <td>Above P8,000,000</td>
             <td>35%</td>
-        </tr>
-        <tr>
-            <td>5</td>
-            <td>Above PHP 2,000,000</td>
-            <td>40%</td>
+            <td>P2,202,500 + 35% of (Income - P8,000,000)</td>
         </tr>
     </table>
 
@@ -51,25 +57,17 @@
 
     <button onclick="calculateTax()">Calculate Tax</button>
 
-    <h2>Result</h2>
+    <h2>Result:</h2>
+    <p id="result" style ="display: none;"></p>
 
-    <!-- Display the income tax in a textbox -->
     <label for="incomeTax">Income Tax (PHP):</label>
     <input type="text" id="incomeTax" readonly><br><br>
 
-    <!-- Display the monthly tax in a textbox -->
-    <label for="monthlyTax">Monthly Tax (PHP):</label>
-    <input type="text" id="monthlyTax" readonly><br><br>
-
-    <!-- Display the monthly income in a textbox -->
     <label for="monthlyIncome">Monthly Income (PHP):</label>
     <input type="text" id="monthlyIncome" readonly><br><br>
 
-    <!-- Display the tax rate in a textbox -->
-    <label for="taxRate">Tax Rate (%):</label>
-    <input type="text" id="taxRate" readonly>
-
-    <p id="result" style="display: none;"></p>
+    <label for="taxRate">Tax Rate:</label>
+    <input type="text" id="taxRate" readonly><br><br>
 
     <script>
         // Fixed tax rates from the array
@@ -94,10 +92,6 @@
             // Display the income tax
             document.getElementById('incomeTax').value = taxAmount.toFixed(2);
 
-            // Display the monthly tax
-            var monthlyTax = taxAmount / 12;
-            document.getElementById('monthlyTax').value = monthlyTax.toFixed(2);
-
             // Display the monthly income
             var monthlyIncome = income / 12;
             document.getElementById('monthlyIncome').value = monthlyIncome.toFixed(2);
@@ -106,25 +100,26 @@
             var taxRateIndex = getTaxRateIndex(income);
             var taxRate = taxRates[taxRateIndex];
             document.getElementById('taxRate').value = taxRate.toFixed(2) + '%';
+
+            // Display the monthly tax
+            var monthlyTax = taxAmount / 12;
+            document.getElementById('monthlyTax').value = monthlyTax.toFixed(2);
         }
 
         function calculatePhilippineTax(income) {
-            // Philippine Tax Ranges (as of my last knowledge update in January 2022)
-            var taxRanges = [250000, 400000, 800000, 2000000];
+            // Updated Philippine Tax Rates
+            var taxRanges = [250000, 400000, 800000, 2000000, 8000000];
+            var taxRates = [0, 0.15, 0.20, 0.25, 0.30, 0.35];
             var tax = 0;
 
             for (var i = 0; i < taxRanges.length; i++) {
                 if (income <= taxRanges[i]) {
-                    tax += income * (taxRates[i] / 100);
+                    // Calculate tax based on the rate and excess income over the previous bracket
+                    tax += (income - (i > 0 ? taxRanges[i - 1] : 0)) * taxRates[i];
                     return tax;
-                } else {
-                    tax += (taxRanges[i] - (i === 0 ? 0 : taxRanges[i - 1])) * (taxRates[i] / 100);
-                    income -= (taxRanges[i] - (i === 0 ? 0 : taxRanges[i - 1]));
                 }
             }
 
-            // If income exceeds the last range
-            tax += income * (taxRates[taxRates.length - 1] / 100);
             return tax;
         }
 
